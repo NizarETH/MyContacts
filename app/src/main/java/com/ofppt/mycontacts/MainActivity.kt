@@ -1,11 +1,19 @@
 package com.ofppt.mycontacts
 
+import android.Manifest
+
 import android.database.Cursor
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.MultiplePermissionsReport
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+
 import java.util.concurrent.Executors
 import java.util.regex.Pattern
 
@@ -14,16 +22,33 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        findViewById<View>(R.id.open_contacts).setOnClickListener(
-            {
-                getContactListFromLocal()
-            }
-        )
-    }
-    private fun getContactListFromLocal() {
 
-        val noDuplicatedList: MutableList<Contact?> = ArrayList<Contact?>()
-        Executors.newSingleThreadExecutor().execute {
+        findViewById<View>(R.id.open_contacts).setOnClickListener {
+
+            Dexter.withContext(this@MainActivity).withPermissions(
+                Manifest.permission.WRITE_CONTACTS,
+                Manifest.permission.READ_CONTACTS
+            )
+                .withListener(object : MultiplePermissionsListener {
+                    override fun onPermissionsChecked(p0: MultiplePermissionsReport?) {
+
+                        getContactListFromLocal()
+                    }
+
+                    override fun onPermissionRationaleShouldBeShown(
+                        p0: MutableList<PermissionRequest>?,
+                        p1: PermissionToken?
+                    ) {
+                        p1?.continuePermissionRequest()
+                    }
+
+                }).check()
+
+        }
+    }
+     fun getContactListFromLocal() {
+
+
 
                 val myContacts: MutableList<Contact?> =
                     ArrayList<Contact?>()
@@ -65,9 +90,12 @@ class MainActivity : AppCompatActivity() {
                     } while (cursor.moveToNext())
                 }
 
+             runOnUiThread {
+                 Toast.makeText(this@MainActivity, " contact "+myContacts.get(0)?.name + " "+myContacts.get(0)?.number, Toast.LENGTH_LONG).show()
+             }
 
-                Toast.makeText(this@MainActivity, " size "+myContacts.size, Toast.LENGTH_LONG).show()
 
-        }
     }
+
+
 }
