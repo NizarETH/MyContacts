@@ -25,24 +25,7 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.open_contacts).setOnClickListener {
 
-            Dexter.withContext(this@MainActivity).withPermissions(
-                Manifest.permission.WRITE_CONTACTS,
-                Manifest.permission.READ_CONTACTS
-            )
-                .withListener(object : MultiplePermissionsListener {
-                    override fun onPermissionsChecked(p0: MultiplePermissionsReport?) {
-
-                        getContactListFromLocal()
-                    }
-
-                    override fun onPermissionRationaleShouldBeShown(
-                        p0: MutableList<PermissionRequest>?,
-                        p1: PermissionToken?
-                    ) {
-                        p1?.continuePermissionRequest()
-                    }
-
-                }).check()
+            getContactListFromLocal()
 
         }
     }
